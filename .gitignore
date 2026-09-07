@@ -22,3 +22,8 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# bin paste to compile codes via bash
+# javac -d bin <path_to_file>/*.java
+# java -cp bin <path_to_file>.Main
+bin/
