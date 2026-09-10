@@ -1,4 +1,4 @@
-package estudos.produto_loja.src;
+package estudos.produto_loja;
 
 public class ProdutoComum extends Produto{
     @Override

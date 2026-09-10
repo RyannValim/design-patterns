@@ -1,4 +1,4 @@
-package estudos.heranca.src;
+package estudos.heranca;
 
 public abstract class Animal {
     protected String nome;

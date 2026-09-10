@@ -1,4 +1,4 @@
-package estudos.locacao_equipamentos.src;
+package estudos.locacao_equipamentos;
 
 public class ServicoDeLocacao{
     public String processarLocacao(Equipamento equipamento, int diasLocacao){

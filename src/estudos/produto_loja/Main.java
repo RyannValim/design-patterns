@@ -1,4 +1,4 @@
-package estudos.produto_loja.src;
+package estudos.produto_loja;
 
 public class Main {
     public static void main(String[] args){

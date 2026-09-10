@@ -1,4 +1,4 @@
-package estudos.heranca.src;
+package estudos.heranca;
 
 public class Cachorro extends Animal{
     @Override

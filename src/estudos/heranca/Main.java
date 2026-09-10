@@ -1,4 +1,4 @@
-package estudos.heranca.src;
+package estudos.heranca;
 
 public class Main {
     public static void main(String[] args){

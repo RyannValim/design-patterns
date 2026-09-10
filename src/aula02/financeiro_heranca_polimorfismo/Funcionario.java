@@ -1,4 +1,4 @@
-package aula02.src;
+package aula02.financeiro_heranca_polimorfismo;
 
 public abstract class Funcionario{
     protected String nome;

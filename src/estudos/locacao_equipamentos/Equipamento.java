@@ -1,4 +1,4 @@
-package estudos.locacao_equipamentos.src;
+package estudos.locacao_equipamentos;
 
 public abstract class Equipamento{
     protected String nome;

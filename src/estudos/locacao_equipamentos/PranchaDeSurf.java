@@ -1,4 +1,4 @@
-package estudos.locacao_equipamentos.src;
+package estudos.locacao_equipamentos;
 
 public class PranchaDeSurf extends Equipamento implements Cautelavel{
     private double taxaManutencao = 15.00;

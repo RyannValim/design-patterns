@@ -1,4 +1,4 @@
-package estudos.produto_loja.src;
+package estudos.produto_loja;
 
 public class Carrinho{
     public double calcularTotal(Produto[] produtos){
