@@ -7,6 +7,30 @@ Design Patterns são um kit de ferramentas para soluções tentadas e testadas p
 Este projeto abrange (por enquanto): FactoryMethod, AbstractFactory e Observer.
 ---
 
+## Cola rápida (como reconhecer na prova)
+
+| O enunciado diz… | É |
+|---|---|
+| "a **subclasse** decide qual objeto criar"; **um** produto por criador | **Factory Method** |
+| "**família** de produtos"; "os N artefatos têm de ser do mesmo X"; "não pode misturar" | **Abstract Factory** |
+| "quando um objeto muda, todos os interessados são avisados"; "não sei quantos são" | **Observer** |
+
+O que separa os dois criacionais é **quantos tipos de produto** existem:
+
+| | Factory Method | Abstract Factory |
+|---|---|---|
+| Mecanismo | **herança** — a subclasse sobrescreve o método-fábrica | **composição** — o cliente recebe um objeto-fábrica pronto |
+| Tipos de produto | **1** por criador | **vários** (a família) |
+| Métodos de criação | 1 | um para cada tipo de produto |
+| Quem decide o produto | a subclasse do `Creator` | a fábrica concreta escolhida na borda |
+| Impede combinação inválida? | **não** (não há o que combinar) | **sim**, pela estrutura |
+| Custo de uma **variante nova** (canal novo, país novo) | 2 classes novas, 0 alteradas | 1 fábrica + N produtos, 0 alteradas |
+| Custo de um **tipo de produto novo** | não se aplica | **caro**: muda a interface da fábrica e **todas** as concretas |
+
+Nos dois, o `if`/`switch` que traduz texto em tipo **não desaparece** — ele vai para a **borda** (`Main`) e passa a aparecer **uma vez só**.
+
+---
+
 # Factory Method
 
 **Intenção (GoF p. 112):** define uma interface para criar um objeto, mas deixa as **subclasses decidirem que classe instanciar**. O Factory Method permite adiar a instanciação para subclasses.
@@ -110,6 +134,127 @@ notifier.alert("mensagem");
 **Livro:** p. 112-120 (PDF 106-114 nesta edição). Estrutura e Participantes: p. 113-114. Implementação: p. 115-118.
 
 **Código:** `src/notification/normal` (acoplado) × `src/notification/simplefactory` (passo intermediário) × `src/notification/factorymethod` (padrão).
+
+---
+
+# Abstract Factory
+
+**Intenção (GoF p. 95):** fornecer uma interface para criação de **famílias de objetos relacionados ou dependentes** sem especificar suas classes concretas.
+
+Também conhecido como **Kit**.
+
+A frase que resolve a maioria das dúvidas: o Factory Method cria **um** produto; o Abstract Factory cria **um conjunto** de produtos que têm de funcionar juntos.
+
+E a armadilha de vocabulário: **não é "fábrica de fábricas"**. É uma fábrica que cria vários produtos relacionados.
+
+## Use quando
+
+- um sistema deve ser independente de **como** seus produtos são criados, compostos ou representados;
+- um sistema deve ser configurado com **uma** entre **múltiplas famílias** de produtos;
+- uma família de produtos é projetada para ser usada **em conjunto** e você precisa **garantir** essa restrição;
+- você quer expor só as **interfaces** de uma biblioteca de produtos, não as implementações.
+
+## Participantes
+
+| Papel (livro) | Exemplo (checkout por país) | Responsabilidade |
+|---|---|---|
+| `AbstractFactory` | `FabricaCheckout` | declara **uma operação de criação para cada tipo** de produto |
+| `ConcreteFactory` | `FabricaBrasil`, `FabricaEUA`, `FabricaAlemanha` | implementa essas operações devolvendo os produtos **da sua família** |
+| `AbstractProduct` | `DocumentoFiscal`, `Pagamento`, `EtiquetaEnvio` | declara a interface de **um** tipo de produto |
+| `ConcreteProduct` | `NotaFiscalEletronica`, `SalesInvoice`, `VatInvoice`, … | implementa o `AbstractProduct`; é criado pela fábrica correspondente |
+| `Client` | `Checkout` | usa **somente** `AbstractFactory` e as interfaces de produto |
+
+**Colaborações (p. 98):** normalmente existe **uma única instância** de cada fábrica concreta em tempo de execução. Para trocar de família, o cliente usa **outra** fábrica concreta — nada mais muda.
+
+## Relações (as linhas do diagrama)
+
+| De | Para | Relação | Por quê |
+|---|---|---|---|
+| cada `FabricaX` | `FabricaCheckout` | realização (tracejada + triângulo vazado) | `implements` |
+| cada produto concreto | seu `AbstractProduct` | realização | `implements` |
+| cada `FabricaX` | seus produtos concretos | dependência `<<create>>` | `new` dentro do método |
+| `Checkout` | `FabricaCheckout` | **associação** | atributo recebido no construtor |
+| `Checkout` | cada `AbstractProduct` | dependência `<<use>>` | variável local / tipo de retorno |
+
+Regra de conferência do diagrama: **o `Client` não tem nenhuma seta para classe concreta.** Se tiver, o padrão vazou.
+
+## Esqueleto
+
+```java
+// AbstractProduct — um por tipo de artefato
+public interface DocumentoFiscal { String emitir(); }
+public interface Pagamento       { String processar(Double valor); }
+public interface EtiquetaEnvio   { String gerar(String endereco); }
+
+// AbstractFactory — uma operação por tipo de produto
+public interface FabricaCheckout {
+    DocumentoFiscal criarDocumentoFiscal();
+    Pagamento       criarPagamento();
+    EtiquetaEnvio   criarEtiqueta();
+}
+
+// ConcreteFactory — uma por família (país)
+public class FabricaBrasil implements FabricaCheckout {
+    public DocumentoFiscal criarDocumentoFiscal() { return new NotaFiscalEletronica(); }
+    public Pagamento       criarPagamento()       { return new PagamentoPix(); }
+    public EtiquetaEnvio   criarEtiqueta()        { return new EtiquetaCorreios(); }
+}
+
+// Client — zero if, zero nome de classe concreta
+public class Checkout {
+    private final FabricaCheckout fabrica;
+
+    public Checkout(FabricaCheckout fabrica) { this.fabrica = fabrica; }
+
+    public String finalizar(Double valor, String endereco) {
+        DocumentoFiscal doc = fabrica.criarDocumentoFiscal();
+        Pagamento       pag = fabrica.criarPagamento();
+        EtiquetaEnvio   etq = fabrica.criarEtiqueta();
+        return doc.emitir() + pag.processar(valor) + etq.gerar(endereco);
+    }
+}
+
+// borda (Main): único lugar onde a família é escolhida
+new Checkout(new FabricaBrasil()).finalizar(250.0, "01310-100");
+```
+
+Repare: **não existe como escrever a combinação errada.** Os três artefatos saem do mesmo objeto-fábrica, então nota fiscal brasileira com etiqueta da USPS é impossível sem trocar a fábrica inteira. Essa é a garantia **estrutural** — não é uma validação em tempo de execução.
+
+## Consequências (p. 98)
+
+- **+ Isola as classes concretas.** Nomes de produto concreto ficam presos dentro da fábrica; não aparecem no código do cliente.
+- **+ Troca de família é trivial.** A fábrica concreta aparece **uma única vez** na aplicação: quando é instanciada. Trocou ali, trocou a família inteira.
+- **+ Harmonia entre produtos.** Garante que a aplicação usa objetos de **uma só família por vez**.
+- **− Acrescentar um tipo de produto novo é caro.** A interface da `AbstractFactory` **fixa** o conjunto de produtos. Incluir um quarto artefato obriga a mexer na interface **e em todas** as fábricas concretas.
+
+A assimetria que cai em prova: **família nova é barata, tipo de produto novo é caro.**
+
+| Extensão | Custo |
+|---|---|
+| País novo (França) | 1 fábrica nova + 3 produtos novos, **0 classes alteradas** |
+| Artefato novo (seguro) | `AbstractFactory` + **todas** as fábricas concretas alteradas |
+
+## Decisões de implementação (p. 98-100)
+
+| Decisão | Opções | Troca |
+|---|---|---|
+| Quantas instâncias da fábrica | **Singleton** (p. 130) | basta uma por família; é o uso mais comum |
+| Como a fábrica cria os produtos | um **Factory Method** por produto / **Prototype** (p. 121) | Factory Method é o jeito mais comum, mas exige uma subclasse de fábrica por família; Prototype guarda protótipos e clona, dispensando fábrica nova a cada família |
+| Fábrica **extensível** | `criar(tipo)` com parâmetro | mais flexível, **menos seguro**: todo produto volta com a mesma interface abstrata, o cliente não consegue distinguir e pode precisar de *downcast*, que falha em execução |
+
+## Pegadinhas
+
+- **Se só existe um tipo de produto, não é Abstract Factory** — é Factory Method. O que exige o Abstract Factory é a restrição de **combinação** entre produtos diferentes.
+- Uma `ConcreteFactory` **por família**, nunca por produto. `FabricaBrasil`, não `FabricaNotaFiscal`.
+- As operações da fábrica devolvem **`AbstractProduct`**, nunca o tipo concreto — senão o cliente passa a conhecer a classe concreta e a troca de família quebra.
+- O `Client` recebe a fábrica **pronta** (construtor). Se ele desse `new FabricaBrasil()` dentro de si, voltaria a conhecer a família e o padrão perderia a função.
+- Abstract Factory e Factory Method **não são rivais**: o segundo costuma ser o mecanismo interno do primeiro.
+
+**Livro:** p. 95-103 (PDF 89-97 nesta edição). Estrutura e Participantes: p. 97-98. Consequências: p. 98. Implementação: p. 98-100.
+
+**Relacionados:** implementado com **Factory Method** (p. 112) ou **Prototype** (p. 121); a fábrica concreta costuma ser um **Singleton** (p. 130).
+
+**Exercício:** `src/exercicios/checkout` (checkout internacional de marketplace).
 
 ---
 
