@@ -1,4 +1,4 @@
-package notification.normal;
+package notification.livre;
 
 public class Main {
     public static void main(String[] args){

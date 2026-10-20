@@ -1,4 +1,4 @@
-package notification.normal;
+package notification.livre;
 
 public class Notifier{
     public void alert(String channel, String msg){

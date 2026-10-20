@@ -1,4 +1,4 @@
-package notification.normal;
+package notification.livre;
 
 public class SmsSender implements Sender{
     public void send(String msg){

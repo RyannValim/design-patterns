@@ -1,5 +1,5 @@
 package pedido.observer;
 
 public interface Observer {
-    public void update(Subject s);
+    public void update(String status);
 }

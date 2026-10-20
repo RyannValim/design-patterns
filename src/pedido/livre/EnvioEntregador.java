@@ -1,4 +1,4 @@
-package pedido.normal;
+package pedido.livre;
 
 public class EnvioEntregador{
     private String statusPedido;

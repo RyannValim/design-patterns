@@ -1,4 +1,4 @@
-package notification.normal;
+package notification.livre;
 
 public class PushSender implements Sender{
     public void send(String msg){

@@ -2,10 +2,10 @@ package pedido.observer;
 
 public class Auditoria implements Observer{
     private String statusObserver;
-    private Pedido p;
 
     // caso tenha mais de um Subject, é a interface quem vai diferenciá-los
-    public void update(Subject s){
-        
+    public void update(String status){
+        this.statusObserver = status;
+        System.out.println("AUDITORIA: [LOG] - status alterado para '" + this.statusObserver + "'.");
     }
 }
