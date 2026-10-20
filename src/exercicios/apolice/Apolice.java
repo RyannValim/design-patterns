@@ -1,4 +1,4 @@
-package apolice;
+package exercicios.apolice;
 
 public abstract class Apolice {
     
