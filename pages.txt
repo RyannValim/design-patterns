@@ -1,0 +1,3 @@
+92 - Abstract Factory
+108 - FactoryMethod
+269 - Observer
